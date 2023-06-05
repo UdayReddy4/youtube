@@ -2,6 +2,8 @@
 #define e_red  2
 #define e_yel  3
 #define e_grn  4
+hiii hlooo gd nyttt
+
 
 #define n_red  5
 #define n_yel  6
