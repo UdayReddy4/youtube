@@ -1,0 +1,431 @@
+
+#define e_red  2
+#define e_yel  3
+#define e_grn  4
+
+#define n_red  5
+#define n_yel  6
+#define n_grn  7
+
+#define w_red  8
+#define w_yel  9
+#define w_grn  10
+
+#define s_red  11
+#define s_yel  12
+#define s_grn  13
+
+#define buz  A0
+
+void buz_on()
+{
+  digitalWrite(buz, LOW);
+}
+void buz_off()
+{
+  digitalWrite(buz, HIGH);
+}
+void buzz_on()
+{
+  for (int i = 0; i < 10; i++)
+  {
+    digitalWrite(buz, LOW);
+    delay(150);
+    digitalWrite(buz, HIGH);
+    delay(100);
+  }
+}
+
+void setup()
+{
+  pinMode(buz, OUTPUT);
+
+  pinMode(e_red, OUTPUT);
+  pinMode(w_red, OUTPUT);
+  pinMode(n_red, OUTPUT);
+  pinMode(s_red, OUTPUT);
+
+  pinMode(e_grn, OUTPUT);
+  pinMode(w_grn, OUTPUT);
+  pinMode(n_grn, OUTPUT);
+  pinMode(s_grn , OUTPUT);
+
+  pinMode(e_yel, OUTPUT);
+  pinMode(w_yel, OUTPUT);
+  pinMode(n_yel, OUTPUT);
+  pinMode(s_yel , OUTPUT);
+
+  digitalWrite(e_red, HIGH);
+  digitalWrite(w_red, HIGH);
+  digitalWrite(n_red, HIGH);
+  digitalWrite(s_red, HIGH);
+
+  digitalWrite(e_grn, HIGH);
+  digitalWrite(w_grn, HIGH);
+  digitalWrite(n_grn, HIGH);
+  digitalWrite(s_grn, HIGH);
+
+  digitalWrite(e_yel, HIGH);
+  digitalWrite(w_yel, HIGH);
+  digitalWrite(n_yel, HIGH);
+  digitalWrite(s_yel, HIGH);
+
+  buz_on();
+  Serial.begin(9600);
+  delay(200);
+  Serial.println("DENSITY BASED TRAFFIC LIGHTS CTRL SYS");
+  buz_off();
+}
+
+void loop()
+{
+  unsigned int uc_i = 0, uc_j = 0;
+  unsigned char  val, msgtype;
+  String data = "";
+
+  msgtype = 0;
+
+  digitalWrite(e_red, LOW);
+  digitalWrite(w_red, LOW);
+  digitalWrite(n_red, LOW);
+  digitalWrite(s_red, LOW);
+  delay(1000);
+
+  digitalWrite(e_red, HIGH);
+  digitalWrite(e_yel, LOW);  //digitalWrite(n_red, LOW);  digitalWrite(w_red, LOW);  digitalWrite(s_red, LOW);
+  delay(3000);
+
+  while (1)
+  {
+    msgtype = (msgtype % 4);
+    msgtype = msgtype + 1;
+
+start:
+    if (msgtype == 1)
+    {
+      buz_on();
+      digitalWrite(s_yel, HIGH); digitalWrite(s_red, LOW);
+      digitalWrite(e_yel, HIGH);
+      digitalWrite(e_grn, LOW);
+      digitalWrite(e_red, HIGH);
+      delay(600);
+      buz_off();
+      //delay(6000);
+      for (uc_i = 0; uc_i < 10; uc_i++)
+      {
+        for (uc_j = 0; uc_j < 600; uc_j++)
+        {
+          delay(1);
+          if (Serial.available() > 0)
+          {
+            data = Serial.readString();
+            Serial.print("RX:"); Serial.println(data);
+            if ((data[0] = '@') && (data[2] = '#'))
+            {
+              val = (data[1] - 48);
+              if (val != 1)
+              {
+                if ( (val > 0) && (val < 5) )
+                {
+                  Serial.print("RX:");  Serial.println(val);
+                  digitalWrite(e_grn, HIGH);
+                  digitalWrite(e_yel, LOW);  delay(1500);
+                  digitalWrite(e_yel, HIGH); digitalWrite(e_red, LOW);
+                  msgtype = val;
+                  Serial.print("msg:");  Serial.println(msgtype);
+                  buzz_on();
+                  goto start;
+                }
+              }
+            }
+          }
+        }
+      }
+      digitalWrite(e_grn, HIGH);
+      digitalWrite(e_yel, LOW);
+      digitalWrite(n_yel, LOW); digitalWrite(n_red, HIGH);
+
+      //delay(3000);
+      for (uc_i = 0; uc_i < 4; uc_i++)
+      {
+        for (uc_j = 0; uc_j < 600; uc_j++)
+        {
+          delay(1);
+          if (Serial.available() > 0)
+          {
+            data = Serial.readString();
+            Serial.print("RX:"); Serial.println(data);
+            if ((data[0] = '@') && (data[2] = '#'))
+            {
+              val = (data[1] - 48);
+
+              if ( (val > 0) && (val < 5) )
+              {
+                Serial.print("RX:");  Serial.println(val);
+                digitalWrite(e_yel, LOW);  delay(500);
+                digitalWrite(e_yel, HIGH); digitalWrite(e_red, HIGH);
+                msgtype = val;
+                buzz_on();
+                goto start;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (msgtype == 2)
+    {
+      buz_on();
+      digitalWrite(e_yel, HIGH); digitalWrite(e_red, LOW);
+      digitalWrite(n_yel, HIGH);
+      digitalWrite(n_grn, LOW);
+      digitalWrite(n_red, HIGH);
+      delay(600);
+      buz_off();
+
+      //delay(6000);
+      for (uc_i = 0; uc_i < 10; uc_i++)
+      {
+        for (uc_j = 0; uc_j < 600; uc_j++)
+        {
+          delay(1);
+          if (Serial.available() > 0)
+          {
+            data = Serial.readString();
+            Serial.print("RX:"); Serial.println(data);
+            if ((data[0] = '@') && (data[2] = '#'))
+            {
+              val = (data[1] - 48);
+              if (val != 2)
+              {
+                if ( (val > 0) && (val < 5) )
+                {
+                  Serial.print("RX:");  Serial.println(val);
+                  digitalWrite(n_grn, HIGH);
+                  digitalWrite(n_yel, LOW);  delay(1500);
+                  digitalWrite(n_yel, HIGH); digitalWrite(n_red, LOW);
+                  msgtype = val;
+                  buzz_on();
+                  goto start;
+                }
+              }
+              else
+              {
+                Serial.print("RE:");  Serial.println(data + 0);
+                delay(10000);
+              }
+            }
+          }
+        }
+      }
+      digitalWrite(n_grn, HIGH);
+      digitalWrite(n_yel, LOW);
+      digitalWrite(w_yel, LOW); digitalWrite(w_red, HIGH);
+
+      //delay(3000);
+      for (uc_i = 0; uc_i < 4; uc_i++)
+      {
+        for (uc_j = 0; uc_j < 600; uc_j++)
+        {
+          delay(1);
+          if (Serial.available() > 0)
+          {
+            data = Serial.readString();
+            Serial.print("RX:"); Serial.println(data);
+            if ((data[0] = '@') && (data[2] = '#'))
+            {
+              val = (data[1] - 48);
+
+              if ( (val > 0) && (val < 5) )
+              {
+                Serial.print("RX:");  Serial.println(val);
+                //digitalWrite(s_grn, HIGH);
+                digitalWrite(n_yel, LOW);  delay(500);
+                digitalWrite(n_yel, HIGH); digitalWrite(n_red, HIGH);
+                msgtype = val;
+                buzz_on();
+                goto start;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (msgtype == 3)
+    {
+      buz_on();
+      digitalWrite(n_yel, HIGH); digitalWrite(n_red, LOW);
+      digitalWrite(w_yel, HIGH);
+      digitalWrite(w_grn, LOW);
+      digitalWrite(w_red, HIGH);
+      delay(600);
+      buz_off();
+
+      //delay(6000);
+      for (uc_i = 0; uc_i < 10; uc_i++)
+      {
+        for (uc_j = 0; uc_j < 600; uc_j++)
+        {
+          delay(1);
+          if (Serial.available() > 0)
+          {
+            data = Serial.readString();
+            Serial.print("RX:"); Serial.println(data);
+            if ((data[0] = '@') && (data[2] = '#'))
+            {
+              val = (data[1] - 48);
+              if (val != 3)
+              {
+                if ( (val > 0) && (val < 5) )
+                {
+                  Serial.print("RX:");  Serial.println(val);
+                  digitalWrite(w_grn, HIGH);
+                  digitalWrite(w_yel, LOW);  delay(1500);
+                  digitalWrite(w_yel, HIGH); digitalWrite(w_red, LOW);
+                  msgtype = val;
+                  buzz_on();
+                  goto start;
+                }
+              }
+              else
+              {
+                Serial.print("RE:");  Serial.println(data + 0);
+                delay(10000);
+              }
+            }
+          }
+        }
+      }
+      digitalWrite(w_grn, HIGH);
+      digitalWrite(w_yel, LOW);
+      digitalWrite(s_yel, LOW); digitalWrite(s_red, HIGH);
+
+      //delay(3000);
+      for (uc_i = 0; uc_i < 4; uc_i++)
+      {
+        for (uc_j = 0; uc_j < 600; uc_j++)
+        {
+          delay(1);
+          if (Serial.available() > 0)
+          {
+            data = Serial.readString();
+            Serial.print("RX:"); Serial.println(data);
+            if ((data[0] = '@') && (data[2] = '#'))
+            {
+              val = (data[1] - 48);
+
+              if ( (val > 0) && (val < 5) )
+              {
+                Serial.print("RX:");  Serial.println(val);
+                digitalWrite(s_grn, HIGH);
+                digitalWrite(w_yel, LOW);  delay(500);
+                digitalWrite(w_yel, HIGH); digitalWrite(w_red, HIGH);
+                msgtype = val;
+                buzz_on();
+                goto start;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (msgtype == 4)
+    {
+      buz_on();
+      digitalWrite(w_yel, HIGH); digitalWrite(w_red, LOW);
+      digitalWrite(s_yel, HIGH);
+      digitalWrite(s_grn, LOW);
+      digitalWrite(s_red, HIGH);
+      delay(600);
+      buz_off();
+
+      //delay(6000);
+      for (uc_i = 0; uc_i < 10; uc_i++)
+      {
+        for (uc_j = 0; uc_j < 600; uc_j++)
+        {
+          delay(1);
+          if (Serial.available() > 0)
+          {
+            data = Serial.readString();
+            Serial.print("RX:"); Serial.println(data);
+            if ((data[0] = '@') && (data[2] = '#'))
+            {
+              val = (data[1] - 48);
+              if (val != 1)
+              {
+                if ( (val > 0) && (val < 5) )
+                {
+                  Serial.print("RX:");  Serial.println(val);
+                  digitalWrite(s_grn, HIGH);
+                  digitalWrite(s_yel, LOW);  delay(1500);
+                  digitalWrite(s_yel, HIGH); digitalWrite(s_red, LOW);
+                  msgtype = val;
+                  buzz_on();
+                  goto start;
+                }
+              }
+            }
+          }
+        }
+      }
+      digitalWrite(s_grn, HIGH);
+      digitalWrite(s_yel, LOW);
+      digitalWrite(e_yel, LOW); digitalWrite(e_red, HIGH);
+
+      //delay(3000);
+      for (uc_i = 0; uc_i < 4; uc_i++)
+      {
+        for (uc_j = 0; uc_j < 600; uc_j++)
+        {
+          delay(1);
+          if (Serial.available() > 0)
+          {
+            data = Serial.readString();
+            Serial.print("RX:"); Serial.println(data);
+            if ((data[0] = '@') && (data[2] = '#'))
+            {
+              val = (data[1] - 48);
+              if ( (val > 0) && (val < 5) )
+              {
+                Serial.print("RX:");  Serial.println(val);
+                //digitalWrite(s_grn, HIGH);
+                digitalWrite(s_yel, LOW);  delay(500);
+                digitalWrite(s_yel, HIGH); digitalWrite(s_red, HIGH);
+                msgtype = val;
+                buzz_on();
+                goto start;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+/*
+
+    while (1)
+  {
+    if (Serial.available() > 0)
+    {
+      data = Serial.readString();
+      Serial.print("RX:"); Serial.println(data);
+      if ((data[0] = '@') && (data[2] = '#'))
+      {
+        msgtype = data[1]-48;
+        Serial.print("msgtype:"); Serial.println(msgtype);
+      }
+      else
+      {
+        Serial.print("RE:");  Serial.println(data);
+        delay(1000);
+      }
+    }
+  }
+*/
